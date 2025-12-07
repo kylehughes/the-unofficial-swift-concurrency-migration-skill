@@ -1,0 +1,82 @@
+name: Release
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release-skill:
+    name: Build & Release Skill
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Package Skill
+        id: package
+        run: python3 package.py
+
+      - name: Check for content changes
+        id: check_changes
+        run: |
+          git add migrating-to-swift-concurrency
+          if git diff --staged --quiet; then
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "No content changes detected."
+          else
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "Content changes detected."
+          fi
+
+      - name: Get current date
+        if: steps.check_changes.outputs.changes == 'true'
+        id: date
+        run: |
+          echo "date=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
+          echo "human_date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+      - name: Update Claude plugin marketplace metadata
+        if: steps.check_changes.outputs.changes == 'true'
+        run: |
+          VERSION="${{ steps.date.outputs.date }}"
+
+          jq --arg v "$VERSION" \
+            '.plugins[0].version = $v' \
+            .claude-plugin/marketplace.json > temp.json && mv temp.json .claude-plugin/marketplace.json
+
+      - name: Commit & push changes
+        if: steps.check_changes.outputs.changes == 'true'
+        run: |
+          git config --global user.name "Kyle Hughes"
+          git config --global user.email "me@kylehugh.es"
+
+          git add .claude-plugin/marketplace.json
+
+          VERSION="${{ steps.date.outputs.date }}"
+          git commit -m "Update Skill content and Claude plugin marketplace metadata to $VERSION"
+
+          git push
+
+      - name: Create release
+        if: steps.check_changes.outputs.changes == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.RELEASE_TOKEN || github.token }}
+          tag_name: ${{ steps.date.outputs.date }}
+          name: Swift Concurrency Migration Guide (${{ steps.date.outputs.human_date }})
+          body: |
+             Skill with the complete content of the [Swift Concurrency Migration Guide](https://github.com/swiftlang/swift-migration-guide) as accessed on ${{ steps.date.outputs.human_date }}.
+          draft: false
+          prerelease: false
+          files: migrating-to-swift-concurrency.zip
+          make_latest: true

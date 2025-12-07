@@ -1,0 +1,57 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "the-unofficial-swift-concurrency-migration-skill",
+  "version": "1.0.0",
+  "description": "Unofficial packaging of the Swift Concurrency Migration Guide as a Skill.",
+  "owner": {
+    "name": "Kyle Hughes",
+    "email": "kyle@kylehugh.es"
+  },
+  "plugins": [
+    {
+      "name": "migrating-to-swift-concurrency-skill",
+      "description": "The complete content of the Swift Concurrency Migration Guide.",
+      "repository": "https://github.com/kylehughes/the-unofficial-swift-concurrency-migration-skill",
+      "version": "20251206",
+      "author": {
+        "name": "Kyle Hughes",
+        "email": "kyle@kylehugh.es"
+      },
+      "license": "Apache-2.0",
+      "category": "documentation",
+      "keywords": [
+        "swift",
+        "concurrency",
+        "migration",
+        "swift6",
+        "async",
+        "await",
+        "actor",
+        "data-race",
+        "sendable",
+        "apple",
+        "ios",
+        "macos"
+      ],
+      "tags": [
+        "swift",
+        "concurrency",
+        "migration",
+        "swift6",
+        "async",
+        "await",
+        "actor",
+        "data-race",
+        "sendable",
+        "apple",
+        "ios",
+        "macos"
+      ],
+      "source": "./",
+      "skills": [
+        "./migrating-to-swift-concurrency"
+      ],
+      "strict": false
+    }
+  ]
+}
